@@ -10,7 +10,7 @@ is_paused = False
 running = True
 
 # Screen settings
-screen_width, screen_height = 1200, 650
+screen_width, screen_height = 1375, 700
 bg_color = (0, 0, 0)
 pendulum_color = (255, 255, 255)
 
@@ -170,9 +170,9 @@ m2_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((50, -140), (20
 g_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((50, -90), (200, 20)), text=f'Gravity: {g}m/s^2', manager=manager, container=manager.get_root_container(), anchors={'left': 'left', 'bottom': 'bottom'})
 
 # Labels for the changing values
-v_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1150, screen_height -600), (200, 20)), text=f'Total Velocity: {v_total}m/s', manager=manager, container=manager.get_root_container())
-ke1_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1150, screen_height -550), (200, 20)), text=f'Kinetic Energy of 1: {ke1}J', manager=manager, container=manager.get_root_container())
-ke2_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1150, screen_height -500), (200, 20)), text=f'Kinetic Energy of 2: {ke2}J', manager=manager, container=manager.get_root_container())
+v_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1325, screen_height -600), (200, 20)), text=f'Total Velocity: {v_total}m/s', manager=manager, container=manager.get_root_container())
+ke1_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1325, screen_height -550), (200, 20)), text=f'Kinetic Energy of 1: {ke1}J', manager=manager, container=manager.get_root_container())
+ke2_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1325, screen_height -500), (200, 20)), text=f'Kinetic Energy of 2: {ke2}J', manager=manager, container=manager.get_root_container())
 
 # Reset button
 reset_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 160), (200, 50)), text="Reset", manager=manager, container=manager.get_root_container())
@@ -230,6 +230,8 @@ while running:
                 if event.ui_element == reset_button:
                     reset_simulation()
                     trail2_points.clear()
+                    trail_v1_points.clear()
+                    trail_v2_points.clear()
 
                 # Pause and Play button
 
@@ -242,6 +244,8 @@ while running:
                 if event.ui_element == plot_button:
                     is_paused = True
                     create_plot()
+                    trail_v1_points.clear()
+                    trail_v2_points.clear()
 
         """ Dragging the pendulum """
 

@@ -35,11 +35,12 @@ dragging_bob = None  # None when not dragging, 'bob1' or 'bob2' when dragging
 initial_mouse_x, initial_mouse_y = 0, 0
 initial_theta1, initial_theta2 = 0, 0
 
-# List that stores the trail points of the first bob
-trail1_points = []
-
 # List that stores the trail points of the second bob
 trail2_points = []
+
+# List that contains the values of the velocity of the two velocities
+trail_v1_points = []
+trail_v2_points = []
 
 pygame.init()
 
@@ -49,6 +50,30 @@ pygame.display.set_caption("Double Pendulum Simulation")
 clock = pygame.time.Clock()
 
 """ Initial Calculations, using Runge-Kutta's fourth order and functions"""
+
+# Velocities
+
+# Velocity of the first bob
+vx1 = -l1 * scaling_factor * omega1 * math.sin(theta1)
+vy1 = l1 * scaling_factor * omega1 * math.cos(theta1)
+
+# Velocity of the second bob
+vx2 = -l2 * scaling_factor * omega2 * math.sin(theta2)
+vy2 = l2 * scaling_factor * omega2 * math.cos(theta2)
+
+# Total velocity
+vx_total = vx1 + vx2
+vy_total = vy1 + vy2
+
+v_total = math.sqrt(vx_total**2 + vy_total**2)
+
+# Kinetic Energy
+
+# K.E of the first bob
+ke1 = (1/2) * m1 * (vx1**2 + vy1**2)
+
+# K.E of the second bob
+ke2 = (1/2) * m2 * (vx2**2 + vy2**2)
 
 def calculate_angle(x, y, center_x, center_y):
     return math.atan2(x - center_x, y - center_y)
@@ -85,43 +110,31 @@ def reset_simulation():
     omega2 = 0
 
 def create_plot():
-    # Extracting x and y coordinates from the trail_points
-    x1_coordinates, y1_coordinates = zip(*trail1_points)
-    x2_coordinates, y2_coordinates = zip(*trail2_points)
+    # X and Y coordinates
+    x1_coordinates, y1_coordinates = zip(*trail_v1_points)
+    x2_coordinates, y2_coordinates = zip(*trail_v2_points)
 
-    # Creating a scatter plot of the trail points
-    plt.figure(figsize=(8, 6))
-    plt.scatter(x2_coordinates, y2_coordinates, s=5, c='blue', marker='o')
-    plt.scatter(x1_coordinates, y1_coordinates, s=3, c='red', marker='o')
-    plt.title('Pendulum positions')
-    plt.xlabel('X Position')
-    plt.ylabel('Y Position')
-    plt.grid(True)
+    # Create a new figure and axis
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Plot the trail points
+    ax.scatter(x2_coordinates, y2_coordinates, s=5, c='blue', marker='o', label='Bob 2')
+    ax.scatter(x1_coordinates, y1_coordinates, s=3, c='red', marker='o', label='Bob 1')
+    
+    # Set axis labels and a title
+    ax.set_xlabel('T, s')
+    ax.set_ylabel('V, m/s')
+    ax.set_title('Pendulum velocity')
+    
+    # Add a legend
+    ax.legend()
+
+    # Show the grid
+    ax.grid(True)
+
+    # Display the plot
     plt.show()
 
-# Velocities
-
-# Velocity of the first bob
-vx1 = -l1 * scaling_factor * omega1 * math.sin(theta1)
-vy1 = l1 * scaling_factor * omega1 * math.cos(theta1)
-
-# Velocity of the second bob
-vx2 = -l2 * scaling_factor * omega2 * math.sin(theta2)
-vy2 = l2 * scaling_factor * omega2 * math.cos(theta2)
-
-# Total velocity
-vx_total = vx1 + vx2
-vy_total = vy1 + vy2
-
-v_total = math.sqrt(vx_total**2 + vy_total**2)
-
-# Kinetic Energy
-
-# K.E of the first bob
-ke1 = (1/2) * m1 * (vx1**2 + vy1**2)
-
-# K.E of the second bob
-ke2 = (1/2) * m2 * (vx2**2 + vy2**2)
 
 """ UI part """
 
@@ -303,7 +316,8 @@ while running:
 
     # Appending the current position to the lists
     trail2_points.append((float(x2), float(y2)))
-    trail1_points.append((float(x1), float(y1)))
+    trail_v1_points.append((float(vx1), float(vy1)))
+    trail_v2_points.append((float(vx2), float(vy2)))
 
     # Limit the number of points to keep the trail length manageable
     max_points = 50

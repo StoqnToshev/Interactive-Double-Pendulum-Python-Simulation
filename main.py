@@ -42,6 +42,14 @@ trail2_points = []
 trail_v1_points = []
 trail_v2_points = []
 
+# Lists to store time and velocity values
+time_values = []
+velocity_values = []
+
+# Lists to store time and velocity values for the graph
+graph_time_values = []
+graph_velocity_values = []
+
 pygame.init()
 
 # Pygame settings
@@ -84,6 +92,7 @@ def derivatives(theta1, theta2, omega1, omega2):
     domega2 = (2 * math.sin(theta1 - theta2) * (omega1 ** 2 * l1 * (m1 + m2) + g * (m1 + m2) * math.cos(theta1) + omega2 ** 2 * l2 * m2 * math.cos(theta1 - theta2))) / (l2 * (2 * m1 + m2 - m2 * math.cos(2 * theta1 - 2 * theta2)))
     return omega1, omega2, domega1, domega2
 
+# The Runge-Kutta's fourth order
 def runge_kutta(theta1, theta2, omega1, omega2, dt):
     # First set of derivatives
     k1_theta1, k1_theta2, k1_omega1, k1_omega2 = derivatives(theta1, theta2, omega1, omega2)
@@ -102,6 +111,7 @@ def runge_kutta(theta1, theta2, omega1, omega2, dt):
 
     return theta1, theta2, omega1, omega2
 
+# Funtion for reseting the simulation
 def reset_simulation():
     global theta1, theta2, omega1, omega2
     theta1 = 0
@@ -109,32 +119,36 @@ def reset_simulation():
     omega1 = 0
     omega2 = 0
 
+# Function for creating a V/t type graph
+def create_graph():
+    # Creating the graph for the velocity
+    plt.plot(graph_time_values, graph_velocity_values)
+
+    # Adding labels and a title
+    plt.xlabel('Time [s]')
+    plt.ylabel('Velocity [m/s]')
+    plt.title('Velocity per Time')
+
+    # Displaying the plot
+    plt.show()
+
+# Funtion for creating a plot of the movement
 def create_plot():
     # X and Y coordinates
     x1_coordinates, y1_coordinates = zip(*trail_v1_points)
     x2_coordinates, y2_coordinates = zip(*trail_v2_points)
 
-    # Create a new figure and axis
-    fig, ax = plt.subplots(figsize=(8, 6))
-
     # Plot the trail points
-    ax.scatter(x2_coordinates, y2_coordinates, s=5, c='blue', marker='o', label='Bob 2')
-    ax.scatter(x1_coordinates, y1_coordinates, s=3, c='red', marker='o', label='Bob 1')
-    
-    # Set axis labels and a title
-    ax.set_xlabel('T, s')
-    ax.set_ylabel('V, m/s')
-    ax.set_title('Pendulum velocity')
-    
-    # Add a legend
-    ax.legend()
+    plt.plot(x1_coordinates, y1_coordinates)
+    plt.plot(x2_coordinates, y2_coordinates)
 
-    # Show the grid
-    ax.grid(True)
+    # Set axis labels and a title
+    plt.xlabel('X1 , X2')
+    plt.ylabel('Y1, Y2')
+    plt.title('Positions of the two bobs')
 
     # Display the plot
     plt.show()
-
 
 """ UI part """
 
@@ -174,14 +188,20 @@ v_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 
 ke1_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1325, screen_height -550), (200, 20)), text=f'Kinetic Energy of 1: {ke1}J', manager=manager, container=manager.get_root_container())
 ke2_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 1325, screen_height -500), (200, 20)), text=f'Kinetic Energy of 2: {ke2}J', manager=manager, container=manager.get_root_container())
 
+# Water Mark
+pygame_gui.elements.UILabel(relative_rect=pygame.Rect((screen_width - 270, screen_height -600), (200, 20)), text=f'GitHub : StoqnToshev', manager=manager, container=manager.get_root_container())
+
 # Reset button
 reset_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 160), (200, 50)), text="Reset", manager=manager, container=manager.get_root_container())
 
 # Pause and play button
 pause_play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 100), (200, 50)), text="Pause" if is_paused else "Play", manager=manager, container=manager.get_root_container())
 
+# Graph button
+graph_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 220), (200, 50)), text="Graph", manager=manager, container=manager.get_root_container())
+
 # Plot button
-plot_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 220), (200, 50)), text="Plot", manager=manager, container=manager.get_root_container())
+plot_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 280), (200, 50)), text="Plot", manager=manager, container=manager.get_root_container())
 
 """ Everything that happenss, while the program is running """
 
@@ -195,6 +215,7 @@ while running:
 
         # Changing the values in the sliders
         if event.type == pygame.USEREVENT:
+
             if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                 if event.ui_element == l1_slider:
                     l1 = event.value
@@ -228,10 +249,13 @@ while running:
                 # This is for the Reset Button
 
                 if event.ui_element == reset_button:
+                    is_paused = False
                     reset_simulation()
                     trail2_points.clear()
                     trail_v1_points.clear()
                     trail_v2_points.clear()
+                    time_values.clear()
+                    velocity_values.clear()
 
                 # Pause and Play button
 
@@ -239,14 +263,22 @@ while running:
                     is_paused = not is_paused
                     event.ui_element.set_text("Play" if is_paused else "Pause")
 
-                # Plot button    
+                # Graph button    
 
+                if event.ui_element == graph_button:
+                    is_paused = True
+                    create_graph()
+                    time_values.clear()
+                    velocity_values.clear()
+                    graph_time_values.clear()
+                    graph_velocity_values.clear()
+                
                 if event.ui_element == plot_button:
                     is_paused = True
                     create_plot()
                     trail_v1_points.clear()
                     trail_v2_points.clear()
-
+                
         """ Dragging the pendulum """
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -267,14 +299,18 @@ while running:
                     initial_theta1, initial_theta2 = theta1, theta2
 
         if event.type == pygame.MOUSEMOTION:
+
             if dragging_bob:
+
                 mouse_x, mouse_y = event.pos
+
                 if dragging_bob == 'bob1':
                     # Calculate the new angle for bob1
                     delta_x = mouse_x - x1
                     delta_y = mouse_y - y1
                     new_theta1 = calculate_angle(x1 + delta_x, y1 + delta_y, screen_width / 2, screen_height / 2)
                     theta1 = new_theta1
+
                 elif dragging_bob == 'bob2':
                     # Calculate the new angle for bob2
                     delta_x = mouse_x - x2
@@ -291,8 +327,15 @@ while running:
     screen.fill(bg_color)
     
     if not is_paused:
-        #Calculates the new angles
+        # Calculates the new angles
         theta1, theta2, omega1, omega2 = runge_kutta(theta1, theta2, omega1, omega2, dt)
+
+        # Append the current time and velocity to the lists
+        time_values.append(len(time_values) * dt)
+        velocity_values.append(v_total)
+        if not is_paused:  # Only update the graph lists when not paused
+            graph_time_values.append(len(time_values) * dt)
+            graph_velocity_values.append(v_total)
 
     # Calculate the positions of the pendulum bob
     x1 = l1 * scaling_factor * math.sin(theta1) + screen_width / 2

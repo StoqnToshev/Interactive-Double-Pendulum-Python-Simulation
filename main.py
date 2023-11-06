@@ -127,7 +127,7 @@ def create_graph():
     # Adding labels and a title
     plt.xlabel('Time [s]')
     plt.ylabel('Velocity [m/s]')
-    plt.title('Velocity per Time')
+    plt.title('Velocity-Time Graph')
 
     # Displaying the plot
     plt.show()
@@ -145,10 +145,19 @@ def create_plot():
     # Set axis labels and a title
     plt.xlabel('X1 , X2')
     plt.ylabel('Y1, Y2')
-    plt.title('Positions of the two bobs')
+    plt.title('Plot of the movement')
 
     # Display the plot
     plt.show()
+
+def reset_values():
+    global l1, l2, m1, m2, g
+    l1 = 15.0
+    l2 = 15.0
+    m1 = 50.0
+    m2 = 50.0
+    g = 9.81
+
 
 """ UI part """
 
@@ -203,6 +212,10 @@ graph_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_wi
 # Plot button
 plot_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 280), (200, 50)), text="Plot", manager=manager, container=manager.get_root_container())
 
+# Reseting values button
+reset_values_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((screen_width - 270, screen_height - 340), (200, 50)), text="Reset Values", manager=manager, container=manager.get_root_container())
+
+
 """ Everything that happenss, while the program is running """
 
 while running:
@@ -215,34 +228,6 @@ while running:
 
         # Changing the values in the sliders
         if event.type == pygame.USEREVENT:
-
-            if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
-                if event.ui_element == l1_slider:
-                    l1 = event.value
-                elif event.ui_element == l2_slider:
-                    l2 = event.value
-                elif event.ui_element == m1_slider:
-                    m1 = event.value
-                elif event.ui_element == m2_slider:
-                    m2 = event.value
-                elif event.ui_element == g_slider:
-                    g = event.value
-
-                if event.ui_element == l1_slider:
-                    l1 = event.value
-                    l1_label.set_text(f'Length 1: {l1}m')
-                if event.ui_element == l2_slider:
-                    l2 = event.value
-                    l2_label.set_text(f'Length 2: {l2}m')
-                if event.ui_element == m1_slider:
-                    m1 = event.value
-                    m1_label.set_text(f'Mass 1: {m1}kg')
-                if event.ui_element == m2_slider:
-                    m2 = event.value
-                    m2_label.set_text(f'Mass 2: {m2}kg')
-                if event.ui_element == g_slider:
-                    g = event.value
-                    g_label.set_text(f'Gravity: {g}m/s^2')
 
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
 
@@ -278,6 +263,27 @@ while running:
                     create_plot()
                     trail_v1_points.clear()
                     trail_v2_points.clear()
+                
+                if event.ui_element == reset_values_button:
+                    is_paused = False
+                    reset_values()
+
+            if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+                if event.ui_element == l1_slider:
+                    l1 = event.value
+                    l1_label.set_text(f'Length 1: {l1}m')
+                elif event.ui_element == l2_slider:
+                    l2 = event.value
+                    l2_label.set_text(f'Length 2: {l2}m')
+                elif event.ui_element == m1_slider:
+                    m1 = event.value
+                    m1_label.set_text(f'Mass 1: {m1}kg')
+                elif event.ui_element == m2_slider:
+                    m2 = event.value
+                    m2_label.set_text(f'Mass 2: {m2}kg')
+                elif event.ui_element == g_slider:
+                    g = event.value
+                    g_label.set_text(f'Gravity: {g}m/s^2')
                 
         """ Dragging the pendulum """
 
@@ -327,10 +333,11 @@ while running:
     screen.fill(bg_color)
     
     if not is_paused:
+
         # Calculates the new angles
         theta1, theta2, omega1, omega2 = runge_kutta(theta1, theta2, omega1, omega2, dt)
 
-        # Append the current time and velocity to the lists
+        # Appends the current time and velocity to the lists
         time_values.append(len(time_values) * dt)
         velocity_values.append(v_total)
         if not is_paused:  # Only update the graph lists when not paused
@@ -392,8 +399,8 @@ while running:
     g_label.update(time_delta)
 
     v_label.set_text(f'Total Velocity: {v_total:.2f}m/s')
-    ke1_label.set_text(f'Kinetic Energy of 1: {ke1:.2f}J')
-    ke2_label.set_text(f'Kinetic Energy of 2: {ke2:.2f}J')
+    ke1_label.set_text(f'Kinetic Energy of 1: {ke1:.2f} J')
+    ke2_label.set_text(f'Kinetic Energy of 2: {ke2:.2f} J')
 
     pygame.display.flip()
 

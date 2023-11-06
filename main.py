@@ -28,7 +28,7 @@ omega1 = 0
 omega2 = 0
 
 # Constants for the simulation
-dt = 0.05  # Time step
+dt = 0.1  # Time step
 scaling_factor = 10  # Scaling factor for pendulum size
 
 dragging_bob = None  # None when not dragging, 'bob1' or 'bob2' when dragging
